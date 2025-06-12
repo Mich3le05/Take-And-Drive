@@ -1,10 +1,8 @@
-import VehiclesList from '../components/VehiclesList'
-
 const Vehicles = () => {
   return (
     <div>
-      <h2>Lista Veicoli</h2>
-      <VehiclesList />
+      <h1>Benvenuto in Take&Drive</h1>
+      <p>Il tuo servizio di noleggio veicoli di fiducia.</p>
     </div>
   )
 }

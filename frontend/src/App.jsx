@@ -1,31 +1,42 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import NavigationBar from './components/Navbar'
-import Footer from './components/Footer'
+import { Row, Col } from 'react-bootstrap'
+import './assets/css/App.css'
 
+import NotFound from './components/NotFound'
+import MyNav from './components/MyNav'
+import MyFooter from './components/MyFooter'
 import Home from './pages/Home'
 import Vehicles from './pages/Vehicles'
 import Profile from './pages/Profile'
-import Login from './components/Login'
-import Register from './components/Register'
+
 import VehiclesDetails from './components/VehiclesDetails'
-import Reservations from './components/Reservations'
 
 function App() {
   return (
     <Router>
-      <NavigationBar />
-      <div className="container mt-4">
+      <MyNav />
+      <main className="body">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/vehicles" element={<Vehicles />} />
           <Route path="/vehicles/:id" element={<VehiclesDetails />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/reservations" element={<Reservations />} />
+
+          <Route
+            path="*"
+            element={
+              <Row className="justify-content-center">
+                <Col xs={12} md={8} lg={6}>
+                  <NotFound />
+                </Col>
+              </Row>
+            }
+          />
         </Routes>
-      </div>
-      <Footer />
+      </main>
+      <footer>
+        <MyFooter />
+      </footer>
     </Router>
   )
 }
