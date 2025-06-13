@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Container, Nav, Navbar } from 'react-bootstrap'
 import { Link, useLocation } from 'react-router-dom'
-import logo from '../assets/images/logo.png'
+import logo from '../assets/images/logo2.png'
+import { CgProfile } from 'react-icons/cg'
 
 const MyNav = () => {
   const location = useLocation()
@@ -20,7 +21,7 @@ const MyNav = () => {
         <Navbar.Brand
           as={Link}
           to="/"
-          className="d-flex align-items-center py-1"
+          className="d-flex align-items-center"
           onClick={() => setExpanded(false)}
         >
           <img src={logo} alt="logo" className="logo" />
@@ -28,10 +29,7 @@ const MyNav = () => {
 
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
 
-        <Navbar.Collapse
-          id="responsive-navbar-nav"
-          className="justify-content-center"
-        >
+        <Navbar.Collapse id="responsive-navbar-nav" className="">
           <Nav className="mx-auto">
             <Link
               className={`nav-link text-color fw-semibold fs-5 ${
@@ -53,12 +51,32 @@ const MyNav = () => {
             </Link>
             <Link
               className={`nav-link text-color fw-semibold fs-5 ${
+                location.pathname === '/contacts' ? 'active' : ''
+              }`}
+              to="/contacts"
+              onClick={() => setExpanded(false)}
+            >
+              Contacts
+            </Link>
+            <Link
+              className={`nav-link text-color fw-semibold fs-5 ${
+                location.pathname === '/operation' ? 'active' : ''
+              }`}
+              to="/operation"
+              onClick={() => setExpanded(false)}
+            >
+              How it works
+            </Link>
+          </Nav>
+          <Nav>
+            <Link
+              className={`nav-link text-color fw-semibold fs-5 ${
                 location.pathname === '/profile' ? 'active' : ''
               }`}
               to="/profile"
               onClick={() => setExpanded(false)}
             >
-              Profile
+              <CgProfile size={25} />
             </Link>
           </Nav>
         </Navbar.Collapse>

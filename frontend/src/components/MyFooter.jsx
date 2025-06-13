@@ -13,23 +13,15 @@ const MyFooter = () => {
       <Row className="text-center text-md-start">
         <Col md={3} className="mb-4 mb-md-0">
           <Link className="nav-link fw-semibold" to="/">
-            Biscottificio Castroreale S.r.l
+            Take&Drive
           </Link>
-          <Link className="nav-link" to="/">
-            Via Castroreale, 0
-          </Link>
-          <Link className="nav-link" to="/">
-            Sicilia, Castroreale (ME)
-          </Link>
-          <Link className="nav-link" to="/">
-            P.IVA 123456789
-          </Link>
+
           <Link
             className="nav-link d-flex align-items-center justify-content-center justify-content-md-start mt-4"
             to="/"
           >
             <MdOutlineMail size={20} className="me-2 fw-bold" />
-            info@biscottificio.com
+            takeanddrive@info.com
           </Link>
           <Link
             className="nav-link d-flex align-items-center justify-content-center justify-content-md-start"
@@ -44,14 +36,14 @@ const MyFooter = () => {
           <Link className="nav-link mb-1" to="/">
             Home
           </Link>
-          <Link className="nav-link mb-1" to="/products">
-            Prodotti
+          <Link className="nav-link mb-1" to="/vehicles">
+            Vehicles
           </Link>
-          <Link className="nav-link mb-1" to="/about">
-            Contatti
+          <Link className="nav-link mb-1" to="/contacts">
+            Contacts
           </Link>
-          <Link className="nav-link mb-1" to="/products">
-            Compra
+          <Link className="nav-link mb-1" to="/operations">
+            How it works
           </Link>
         </Col>
 
@@ -60,7 +52,7 @@ const MyFooter = () => {
             Privacy Policy
           </Link>
           <Link className="nav-link mb-1" to="/">
-            Termini e Condizioni
+            Terms and conditions
           </Link>
           <Link className="nav-link mb-1" to="/">
             Cookie policy
