@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Row, Col } from 'react-bootstrap'
 import './assets/css/App.css'
+import 'leaflet/dist/leaflet.css'
 
 import NotFound from './components/NotFound'
 import MyNav from './components/MyNav'

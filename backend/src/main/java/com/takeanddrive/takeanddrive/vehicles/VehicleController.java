@@ -47,18 +47,9 @@ public class VehicleController {
     }
 
     @GetMapping("/paged")
-    public PagedResponse<VehicleResponse> getAllPaged(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
+    public PagedResponse<VehicleResponse> getAllPaged(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
         Page<VehicleResponse> pageResult = vehicleService.findAllPaged(page, size);
-        return new PagedResponse<>(
-                pageResult.getContent(),
-                pageResult.getNumber(),
-                pageResult.getSize(),
-                pageResult.getTotalPages(),
-                pageResult.getTotalElements()
-        );
+        return new PagedResponse<>(pageResult.getContent(), pageResult.getNumber(), pageResult.getSize(), pageResult.getTotalPages(), pageResult.getTotalElements());
     }
 
 
@@ -66,4 +57,10 @@ public class VehicleController {
     public List<VehicleResponse> getByType(@PathVariable String type) {
         return vehicleService.findByType(type);
     }
+
+    @GetMapping("/by-city")
+    public List<VehicleResponse> getByCity(@RequestParam String citta) {
+        return vehicleService.findByCity(citta);
+    }
+
 }

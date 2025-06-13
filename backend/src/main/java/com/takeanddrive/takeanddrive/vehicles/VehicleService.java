@@ -93,4 +93,11 @@ public class VehicleService {
                 vehicle.getImage()
         );
     }
+    public List<VehicleResponse> findByCity(String city) {
+        List<Vehicle> vehicles = vehicleRepository.findByCompany_CityIgnoreCase(city);
+        return vehicles.stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
 }

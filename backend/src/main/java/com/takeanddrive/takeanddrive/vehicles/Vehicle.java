@@ -1,5 +1,6 @@
 package com.takeanddrive.takeanddrive.vehicles;
 
+import com.takeanddrive.takeanddrive.company.Company;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,4 +36,8 @@ public class Vehicle {
     private String createdBy;
     private Integer year;
     private String image;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 }
