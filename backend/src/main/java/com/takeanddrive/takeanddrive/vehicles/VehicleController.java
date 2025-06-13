@@ -58,9 +58,11 @@ public class VehicleController {
         return vehicleService.findByType(type);
     }
 
-    @GetMapping("/by-city")
-    public List<VehicleResponse> getByCity(@RequestParam String citta) {
-        return vehicleService.findByCity(citta);
+    @GetMapping("/api/vehicles/by-city")
+    public List<VehicleResponse> getVehiclesByCity(@RequestParam String city) {
+        return vehicleService.findByCity(city);
     }
+
+
 
 }

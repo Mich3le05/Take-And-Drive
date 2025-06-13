@@ -27,8 +27,9 @@ const Vehicles = () => {
 
     try {
       const response = await fetch(
-        `/api/veicoli-per-citta?citta=${encodeURIComponent(citta)}`
+        `/api/vehicles/by-city?city=${encodeURIComponent(citta)}`
       )
+
       if (!response.ok) {
         throw new Error('Errore nella risposta dal server')
       }
