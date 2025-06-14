@@ -10,7 +10,7 @@ import Home from './pages/Home'
 import Vehicles from './pages/Vehicles'
 import Profile from './pages/Profile'
 
-import VehiclesDetails from './components/VehiclesDetails'
+import VehicleDetail from './components/VehicleDetail'
 
 function App() {
   return (
@@ -20,7 +20,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/vehicles" element={<Vehicles />} />
-          <Route path="/vehicles/:id" element={<VehiclesDetails />} />
+          <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/profile" element={<Profile />} />
 
           <Route

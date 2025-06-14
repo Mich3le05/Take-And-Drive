@@ -62,6 +62,12 @@ public class VehicleController {
     public List<VehicleResponse> getVehiclesByCity(@RequestParam String city) {
         return vehicleService.findByCity(city);
     }
+    @GetMapping("/{id}")
+    public VehicleResponse getById(@PathVariable Long id) {
+        return vehicleService.findById(id);
+    }
+
+
 
 
 

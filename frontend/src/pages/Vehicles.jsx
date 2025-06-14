@@ -9,14 +9,16 @@ import {
   Spinner,
 } from 'react-bootstrap'
 import MapSelector from '../components/MapSelector'
-import Error from '../components/Error'
+import ErrorComponent from '../components/Error'
+import { useNavigate } from 'react-router-dom'
 
 const Vehicles = () => {
   const [citta, setCitta] = useState('')
   const [veicoli, setVeicoli] = useState([])
   const [loading, setLoading] = useState(false)
   const [errore, setErrore] = useState('')
-  const [companies, setCompanies] = useState([]) // <-- Nuovo stato
+  const [companies, setCompanies] = useState([])
+  const navigate = useNavigate()
 
   const cercaVeicoli = async (e) => {
     e.preventDefault()
@@ -46,7 +48,7 @@ const Vehicles = () => {
         setErrore(`Nessun veicolo trovato per la città: ${citta}`)
       } else {
         setVeicoli(tuttiVeicoli)
-        setCompanies(companiesByCity) // Salva anche le company filtrate
+        setCompanies(companiesByCity)
       }
     } catch (err) {
       console.error('Errore nel recupero dei veicoli:', err)
@@ -122,7 +124,7 @@ const Vehicles = () => {
           )}
         </Button>
 
-        {errore && <Error message={errore} />}
+        {errore && <ErrorComponent message={errore} />}
 
         {veicoli.length > 0 && (
           <div>
@@ -130,7 +132,10 @@ const Vehicles = () => {
             <Row>
               {veicoli.map((veicolo) => (
                 <Col key={veicolo.id} sm={12} md={6} lg={4} className="mb-3">
-                  <Card>
+                  <Card
+                    onClick={() => navigate(`/vehicles/${veicolo.id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <Card.Img variant="top" src={veicolo.image} />
                     <Card.Body>
                       <Card.Title>{veicolo.model}</Card.Title>

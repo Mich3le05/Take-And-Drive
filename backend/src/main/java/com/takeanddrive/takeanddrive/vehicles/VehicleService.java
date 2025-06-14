@@ -99,5 +99,11 @@ public class VehicleService {
                 .map(this::mapToResponse)
                 .toList();
     }
+    public VehicleResponse findById(Long id) {
+        Vehicle vehicle = vehicleRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Vehicle not found with id: " + id));
+        return mapToResponse(vehicle);
+    }
+
 
 }
