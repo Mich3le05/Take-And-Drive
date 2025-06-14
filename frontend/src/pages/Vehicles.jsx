@@ -16,6 +16,7 @@ const Vehicles = () => {
   const [veicoli, setVeicoli] = useState([])
   const [loading, setLoading] = useState(false)
   const [errore, setErrore] = useState('')
+  const [companies, setCompanies] = useState([]) // <-- Nuovo stato
 
   const cercaVeicoli = async (e) => {
     e.preventDefault()
@@ -24,20 +25,55 @@ const Vehicles = () => {
     setLoading(true)
     setErrore('')
     setVeicoli([])
+    setCompanies([])
 
     try {
       const response = await fetch(
-        `/api/vehicles/by-city?city=${encodeURIComponent(citta)}`
+        `/api/companies/by-city?city=${encodeURIComponent(citta)}`
       )
 
       if (!response.ok) {
         throw new Error('Errore nella risposta dal server')
       }
-      const data = await response.json()
-      setVeicoli(data)
+
+      const companiesByCity = await response.json()
+
+      const tuttiVeicoli = companiesByCity.flatMap(
+        (company) => company.vehicles || []
+      )
+
+      if (tuttiVeicoli.length === 0) {
+        setErrore(`Nessun veicolo trovato per la città: ${citta}`)
+      } else {
+        setVeicoli(tuttiVeicoli)
+        setCompanies(companiesByCity) // Salva anche le company filtrate
+      }
     } catch (err) {
       console.error('Errore nel recupero dei veicoli:', err)
       setErrore(err.message || 'Errore durante il recupero dei veicoli.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const caricaTutteLeCompagnie = async () => {
+    setLoading(true)
+    setErrore('')
+    setVeicoli([])
+    setCompanies([])
+
+    try {
+      const response = await fetch('/api/companies')
+
+      if (!response.ok) {
+        throw new Error('Errore nel recupero delle compagnie')
+      }
+
+      const tutte = await response.json()
+      setCompanies(tutte)
+    } catch (err) {
+      console.error(err)
+      setErrore('Impossibile recuperare le compagnie.')
     } finally {
       setLoading(false)
     }
@@ -53,7 +89,7 @@ const Vehicles = () => {
 
         <MapSelector setCitta={setCitta} />
 
-        <Form onSubmit={cercaVeicoli} className="mb-4">
+        <Form onSubmit={cercaVeicoli} className="mb-3">
           <Form.Group>
             <Form.Label>Inserisci una città</Form.Label>
             <Form.Control
@@ -73,6 +109,19 @@ const Vehicles = () => {
           </Button>
         </Form>
 
+        <Button
+          variant="secondary"
+          onClick={caricaTutteLeCompagnie}
+          className="mb-4 w-100"
+          disabled={loading}
+        >
+          {loading ? (
+            <Spinner animation="border" size="sm" />
+          ) : (
+            'Mostra tutte le compagnie'
+          )}
+        </Button>
+
         {errore && <Error message={errore} />}
 
         {veicoli.length > 0 && (
@@ -91,6 +140,28 @@ const Vehicles = () => {
                         Alimentazione: {veicolo.fuelType}
                         <br />
                         Prezzo al giorno: €{veicolo.pricePerDay}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        )}
+
+        {companies.length > 0 && (
+          <div>
+            <h4 className="mt-4">Compagnie trovate:</h4>
+            <Row>
+              {companies.map((company) => (
+                <Col key={company.id} sm={12} md={6} lg={4} className="mb-3">
+                  <Card>
+                    <Card.Body>
+                      <Card.Title>{company.name}</Card.Title>
+                      <Card.Text>
+                        Città: {company.city}
+                        <br />
+                        Veicoli: {company.vehicles?.length || 0}
                       </Card.Text>
                     </Card.Body>
                   </Card>

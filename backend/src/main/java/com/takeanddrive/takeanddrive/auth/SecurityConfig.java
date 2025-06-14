@@ -37,29 +37,28 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(authorize -> {
-                    // Log prima di configurare i permessi
                     System.out.println("Configurazione sicurezza: impostazioni accesso pubblico e autenticato.");
 
                     authorize
-                            // Accesso pubblico
                             .requestMatchers(
                                     "/api/auth/register",
                                     "/api/auth/login",
                                     "/api/vehicles",
                                     "/api/vehicles/**",
+                                    "/api/vehicles/api/vehicles/by-city",
+                                    "/api/vehicles/type/**",
+                                    "/api/companies/**",
+                                    "/api/companies",
+                                    "/api/companies/by-city",
                                     "/api/vehicles/by-city"
-//                                    "/api/products/**",
-//                                    "/api/categories/**",
-//                                    "/api/payments/**"
+//
                             ).permitAll()
-                            // Swagger
                             .requestMatchers(
                                     "/swagger-ui/**",
                                     "/v3/api-docs/**",
                                     "/swagger-resources/**",
                                     "/webjars/**"
                             ).permitAll()
-                            // Tutte le altre richieste richiedono autenticazione
                             .anyRequest().authenticated();
                 })
                 .exceptionHandling(exception -> exception
@@ -88,13 +87,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.addAllowedOrigin("http://localhost:5173");  // Aggiungi il dominio del tuo frontend
-        corsConfig.addAllowedMethod("*");  // Consente tutti i metodi HTTP
-        corsConfig.addAllowedHeader("*");  // Consente tutti gli header
-        corsConfig.setAllowCredentials(true);  // Consente l'uso di credenziali
-
+        corsConfig.addAllowedOrigin("http://localhost:5173");
+        corsConfig.addAllowedMethod("*");
+        corsConfig.addAllowedHeader("*");
+        corsConfig.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", corsConfig);  // Applica la configurazione a tutte le URL
+        source.registerCorsConfiguration("/**", corsConfig);
 
         return source;
     }

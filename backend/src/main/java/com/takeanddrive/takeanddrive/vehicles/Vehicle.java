@@ -1,5 +1,6 @@
 package com.takeanddrive.takeanddrive.vehicles;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.takeanddrive.takeanddrive.company.Company;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -39,5 +40,6 @@ public class Vehicle {
 
     @ManyToOne
     @JoinColumn(name = "company_id")
+    @JsonBackReference
     private Company company;
 }

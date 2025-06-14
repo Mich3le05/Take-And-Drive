@@ -1,5 +1,6 @@
 package com.takeanddrive.takeanddrive.company;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.takeanddrive.takeanddrive.vehicles.Vehicle;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -23,6 +24,7 @@ public class Company {
     private String city;
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private List<Vehicle> vehicles = new ArrayList<>();
 
 }
