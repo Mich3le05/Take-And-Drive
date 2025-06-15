@@ -33,7 +33,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         String username = null;
         String jwtToken = null;
 
-        // Estrae il token JWT dal header Authorization
         if (requestTokenHeader != null && requestTokenHeader.startsWith("Bearer ")) {
             jwtToken = requestTokenHeader.substring(7);
             try {
@@ -44,12 +43,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 System.out.println("Il token JWT è scaduto");
             }
         } else {
-            // logger.warn("Il token JWT non inizia con Bearer");
             chain.doFilter(request, response);
             return;
         }
 
-        // Valida il token e configura l'autenticazione nel contesto di sicurezza
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.customUserDetailsService.loadUserByUsername(username);
 

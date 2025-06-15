@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Col,
   Container,
@@ -20,6 +20,17 @@ const Vehicles = () => {
   const [errore, setErrore] = useState('')
   const [companies, setCompanies] = useState([])
   const navigate = useNavigate()
+
+  // Carico i dati salvati in sessionStorage all'inizio
+  useEffect(() => {
+    const datiSalvati = sessionStorage.getItem('vehiclesSearch')
+    if (datiSalvati) {
+      const { citta, veicoli, companies } = JSON.parse(datiSalvati)
+      setCitta(citta)
+      setVeicoli(veicoli)
+      setCompanies(companies)
+    }
+  }, [])
 
   const cercaVeicoli = async (e) => {
     e.preventDefault()
@@ -50,6 +61,16 @@ const Vehicles = () => {
       } else {
         setVeicoli(tuttiVeicoli)
         setCompanies(companiesByCity)
+
+        // Salvo in sessionStorage
+        sessionStorage.setItem(
+          'vehiclesSearch',
+          JSON.stringify({
+            citta,
+            veicoli: tuttiVeicoli,
+            companies: companiesByCity,
+          })
+        )
       }
     } catch (err) {
       console.error('Errore nel recupero dei veicoli:', err)
@@ -124,14 +145,14 @@ const Vehicles = () => {
                   <Card
                     onClick={() =>
                       navigate(`/vehicles/${veicolo.id}`, {
-                        state: { veicolo, citta },
+                        state: { veicolo, citta, companies },
                       })
                     }
                     style={{ cursor: 'pointer' }}
                   >
                     <Card.Img
                       variant="top"
-                      src={veicolo.image}
+                      src={veicolo.image || '/default-vehicle-image.jpg'}
                       style={{ height: '200px', objectFit: 'cover' }}
                     />
                     <Card.Body>

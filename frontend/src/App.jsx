@@ -11,6 +11,7 @@ import Vehicles from './pages/Vehicles'
 import Profile from './pages/Profile'
 
 import VehicleDetail from './components/VehicleDetail'
+import StoricoPrenotazioni from './components/StoricoPrenotazioni'
 
 function App() {
   return (
@@ -22,6 +23,10 @@ function App() {
           <Route path="/vehicles" element={<Vehicles />} />
           <Route path="/vehicles/:id" element={<VehicleDetail />} />
           <Route path="/profile" element={<Profile />} />
+          <Route
+            path="/storico-prenotazioni"
+            element={<StoricoPrenotazioni />}
+          />
 
           <Route
             path="*"

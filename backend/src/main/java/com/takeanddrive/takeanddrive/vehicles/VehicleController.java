@@ -11,11 +11,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
 @RestController
 @RequestMapping("/api/vehicles")
 @RequiredArgsConstructor
-@PreAuthorize("isAuthenticated()")
 public class VehicleController {
 
     private final VehicleService vehicleService;
@@ -52,7 +50,6 @@ public class VehicleController {
         return new PagedResponse<>(pageResult.getContent(), pageResult.getNumber(), pageResult.getSize(), pageResult.getTotalPages(), pageResult.getTotalElements());
     }
 
-
     @GetMapping("/type/{type}")
     public List<VehicleResponse> getByType(@PathVariable String type) {
         return vehicleService.findByType(type);
@@ -62,13 +59,11 @@ public class VehicleController {
     public List<VehicleResponse> getVehiclesByCity(@RequestParam String city) {
         return vehicleService.findByCity(city);
     }
+
     @GetMapping("/{id}")
     public VehicleResponse getById(@PathVariable Long id) {
         return vehicleService.findById(id);
     }
 
-
-
-
-
 }
+
