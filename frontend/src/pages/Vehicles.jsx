@@ -11,6 +11,7 @@ import {
 import MapSelector from '../components/MapSelector'
 import ErrorComponent from '../components/Error'
 import { useNavigate } from 'react-router-dom'
+import '../assets/css/Vehicles.css'
 
 const Vehicles = () => {
   const [citta, setCitta] = useState('')
@@ -58,42 +59,21 @@ const Vehicles = () => {
     }
   }
 
-  const caricaTutteLeCompagnie = async () => {
-    setLoading(true)
-    setErrore('')
-    setVeicoli([])
-    setCompanies([])
-
-    try {
-      const response = await fetch('/api/companies')
-
-      if (!response.ok) {
-        throw new Error('Errore nel recupero delle compagnie')
-      }
-
-      const tutte = await response.json()
-      setCompanies(tutte)
-    } catch (err) {
-      console.error(err)
-      setErrore('Impossibile recuperare le compagnie.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <Container className="py-4">
       <Col xs={12} md={10} lg={8} className="mx-auto">
-        <h1 className="text-center mb-3">Benvenuto in Take&Drive</h1>
-        <p className="text-center">
-          Il tuo servizio di noleggio veicoli di fiducia.
-        </p>
+        <h1 className="text-center mb-3">Cerca il veicolo adatto a te</h1>
+        <h5 className="text-center mb-4">
+          Seleziona una città dalla mappa o scrivi il nome
+        </h5>
 
         <MapSelector setCitta={setCitta} />
 
         <Form onSubmit={cercaVeicoli} className="mb-3">
           <Form.Group>
-            <Form.Label>Inserisci una città</Form.Label>
+            <Form.Label className="fw-semibold fs-4">
+              Inserisci una città
+            </Form.Label>
             <Form.Control
               type="text"
               value={citta}
@@ -111,48 +91,7 @@ const Vehicles = () => {
           </Button>
         </Form>
 
-        <Button
-          variant="secondary"
-          onClick={caricaTutteLeCompagnie}
-          className="mb-4 w-100"
-          disabled={loading}
-        >
-          {loading ? (
-            <Spinner animation="border" size="sm" />
-          ) : (
-            'Mostra tutte le compagnie'
-          )}
-        </Button>
-
         {errore && <ErrorComponent message={errore} />}
-
-        {veicoli.length > 0 && (
-          <div>
-            <h4>Veicoli disponibili a {citta}:</h4>
-            <Row>
-              {veicoli.map((veicolo) => (
-                <Col key={veicolo.id} sm={12} md={6} lg={4} className="mb-3">
-                  <Card
-                    onClick={() => navigate(`/vehicles/${veicolo.id}`)}
-                    style={{ cursor: 'pointer' }}
-                  >
-                    <Card.Img variant="top" src={veicolo.image} />
-                    <Card.Body>
-                      <Card.Title>{veicolo.model}</Card.Title>
-                      <Card.Text>
-                        Tipo: {veicolo.type}
-                        <br />
-                        Alimentazione: {veicolo.fuelType}
-                        <br />
-                        Prezzo al giorno: €{veicolo.pricePerDay}
-                      </Card.Text>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
-            </Row>
-          </div>
-        )}
 
         {companies.length > 0 && (
           <div>
@@ -167,6 +106,38 @@ const Vehicles = () => {
                         Città: {company.city}
                         <br />
                         Veicoli: {company.vehicles?.length || 0}
+                      </Card.Text>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        )}
+
+        {veicoli.length > 0 && (
+          <div>
+            <h4>Veicoli disponibili a {citta}:</h4>
+            <Row>
+              {veicoli.map((veicolo) => (
+                <Col key={veicolo.id} sm={12} md={6} lg={4} className="mb-3">
+                  <Card
+                    onClick={() =>
+                      navigate(`/vehicles/${veicolo.id}`, {
+                        state: { veicolo, citta },
+                      })
+                    }
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <Card.Img
+                      variant="top"
+                      src={veicolo.image}
+                      style={{ height: '200px', objectFit: 'cover' }}
+                    />
+                    <Card.Body>
+                      <Card.Title>{veicolo.model}</Card.Title>
+                      <Card.Text>
+                        Prezzo al giorno: €{veicolo.pricePerDay}
                       </Card.Text>
                     </Card.Body>
                   </Card>

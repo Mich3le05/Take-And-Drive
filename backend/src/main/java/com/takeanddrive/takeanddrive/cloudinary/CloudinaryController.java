@@ -23,7 +23,7 @@ public class CloudinaryController {
     public Map<String, String> upload(@RequestPart("file") MultipartFile file) {
         try {
             Map result = cloudinary.uploader()
-                    .upload(file.getBytes(), Cloudinary.asMap("folder", "Products", "public_id", file.getOriginalFilename()));
+                    .upload(file.getBytes(), Cloudinary.asMap("folder", "Cars", "public_id", file.getOriginalFilename()));
             String url = result.get("secure_url").toString();
 
             return Map.of("imageUrl", url);
