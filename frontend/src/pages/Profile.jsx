@@ -9,12 +9,14 @@ import {
   Alert,
   Card,
   Nav,
+  Tab,
 } from 'react-bootstrap'
 import { Link, useNavigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { jwtDecode } from 'jwt-decode'
 import Loading from '../components/Loading'
 import Error from '../components/Error'
+import Reservations from '../components/Reservations'
 
 const Profile = () => {
   const [userInfo, setUserInfo] = useState(null)
@@ -26,11 +28,28 @@ const Profile = () => {
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [activeTab, setActiveTab] = useState('login') // 'login' o 'register'
+  const [profileTab, setProfileTab] = useState('info') // 'info' o 'reservations'
+
+  // Nuovo stato per le statistiche delle prenotazioni
+  const [reservationStats, setReservationStats] = useState({
+    total: 0,
+    past: 0,
+    future: 0,
+    current: 0,
+  })
+
   const navigate = useNavigate()
 
   useEffect(() => {
     checkAuth()
   }, [])
+
+  useEffect(() => {
+    // Carica le statistiche quando l'utente è autenticato
+    if (userInfo) {
+      loadReservationStats()
+    }
+  }, [userInfo])
 
   const checkAuth = () => {
     const token = localStorage.getItem('token')
@@ -43,6 +62,54 @@ const Profile = () => {
         console.error('Errore nel decodificare il token:', error)
         localStorage.removeItem('token') // Rimuovi token invalido
       }
+    }
+  }
+
+  const loadReservationStats = async () => {
+    try {
+      const token = localStorage.getItem('token')
+
+      // Carica tutte le prenotazioni per le statistiche
+      const [allRes, pastRes, futureRes] = await Promise.all([
+        fetch('/api/reservations', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('/api/reservations/past', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        fetch('/api/reservations/future', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ])
+
+      if (allRes.ok && pastRes.ok && futureRes.ok) {
+        const [allData, pastData, futureData] = await Promise.all([
+          allRes.json(),
+          pastRes.json(),
+          futureRes.json(),
+        ])
+
+        // Calcola prenotazioni correnti (in corso oggi)
+        const today = new Date()
+        today.setHours(0, 0, 0, 0)
+
+        const currentReservations = allData.filter((res) => {
+          const start = new Date(res.startDate)
+          const end = new Date(res.endDate)
+          start.setHours(0, 0, 0, 0)
+          end.setHours(0, 0, 0, 0)
+          return start <= today && end >= today
+        })
+
+        setReservationStats({
+          total: allData.length,
+          past: pastData.length,
+          future: futureData.length,
+          current: currentReservations.length,
+        })
+      }
+    } catch (error) {
+      console.error('Errore nel caricamento delle statistiche:', error)
     }
   }
 
@@ -117,11 +184,11 @@ const Profile = () => {
   const handleLogout = () => {
     localStorage.removeItem('token')
     setUserInfo(null)
-    setToastMessage('Logout eseguito correttamente!')
+    setReservationStats({ total: 0, past: 0, future: 0, current: 0 })
+    setToastMessage('Logout eseguito con successo!')
     setShowToast(true)
-    setTimeout(() => {
-      navigate('/profile')
-    }, 2000)
+    // Opzionale: reindirizza alla homepage
+    // navigate('/')
   }
 
   const resetForm = () => {
@@ -137,52 +204,107 @@ const Profile = () => {
   }
 
   return (
-    <Container
-      fluid
-      className="d-flex justify-content-center font text-color p-5"
-    >
+    <Container fluid className="font text-color p-5">
       <Row className="mt-3">
         <Col xs={12}>
           {userInfo ? (
             <>
-              <h1 className="mb-4 titoli-font text-center">
-                {userInfo.roles?.includes('ROLE_ADMIN')
-                  ? 'Bentornato Admin!'
-                  : `Ciao, ${userInfo.username || userInfo.sub}!`}
-              </h1>
-              <Card className="text-center">
-                <Card.Body>
-                  <Card.Title>Il tuo profilo</Card.Title>
-                  <Card.Text>
-                    <strong>Username:</strong>{' '}
-                    {userInfo.username || userInfo.sub}
-                  </Card.Text>
-                  {userInfo.roles && (
-                    <Card.Text>
-                      <strong>Ruoli:</strong> {userInfo.roles.join(', ')}
-                    </Card.Text>
-                  )}
+              <div className="d-flex justify-content-between align-items-center mb-4">
+                <h1 className="titoli-font text-center flex-grow-1">
+                  {userInfo.roles?.includes('ROLE_ADMIN')
+                    ? 'Bentornato Admin!'
+                    : `Ciao, ${userInfo.username || userInfo.sub}!`}
+                </h1>
+                <Button
+                  variant="outline-danger"
+                  onClick={handleLogout}
+                  className="ms-3"
+                >
+                  Esci
+                </Button>
+              </div>
 
-                  <div className="d-flex justify-content-around mt-4">
-                    {userInfo.roles?.includes('ROLE_ADMIN') && (
-                      <>
-                        <Link
-                          to="/admin/create-product"
-                          className="btn btn-primary me-3"
-                        >
-                          Crea Prodotto
-                        </Link>
-                        <Link to="/products" className="btn btn-secondary me-3">
-                          Modifica Prodotti
-                        </Link>
-                      </>
-                    )}
-                    <Button variant="danger" onClick={handleLogout}>
-                      Logout
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
+              <Tab.Container
+                activeKey={profileTab}
+                onSelect={(k) => setProfileTab(k)}
+                className="w-100"
+              >
+                <Card>
+                  <Card.Header>
+                    <Nav variant="tabs">
+                      <Nav.Item>
+                        <Nav.Link eventKey="info">
+                          Informazioni Profilo
+                        </Nav.Link>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <Nav.Link eventKey="reservations">
+                          Le mie Prenotazioni
+                          {reservationStats.total > 0 && (
+                            <Badge bg="primary" className="ms-1">
+                              {reservationStats.total}
+                            </Badge>
+                          )}
+                        </Nav.Link>
+                      </Nav.Item>
+                    </Nav>
+                  </Card.Header>
+
+                  <Card.Body>
+                    <Tab.Content>
+                      <Tab.Pane eventKey="info">
+                        <div className="text-center mb-4">
+                          <Card.Title>Il tuo profilo</Card.Title>
+                          <Card.Text>
+                            <strong>Username:</strong>{' '}
+                            {userInfo.username || userInfo.sub}
+                          </Card.Text>
+                        </div>
+
+                        {/* Statistiche prenotazioni */}
+                        <Row className="g-3">
+                          <Col md={3} sm={6}>
+                            <Card className="text-center bg-primary text-white">
+                              <Card.Body>
+                                <h3>{reservationStats.total}</h3>
+                                <small>Totale Prenotazioni</small>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                          <Col md={3} sm={6}>
+                            <Card className="text-center bg-success text-white">
+                              <Card.Body>
+                                <h3>{reservationStats.past}</h3>
+                                <small>Completate</small>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                          <Col md={3} sm={6}>
+                            <Card className="text-center bg-warning text-white">
+                              <Card.Body>
+                                <h3>{reservationStats.current}</h3>
+                                <small>In Corso</small>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                          <Col md={3} sm={6}>
+                            <Card className="text-center bg-info text-white">
+                              <Card.Body>
+                                <h3>{reservationStats.future}</h3>
+                                <small>Future</small>
+                              </Card.Body>
+                            </Card>
+                          </Col>
+                        </Row>
+                      </Tab.Pane>
+
+                      <Tab.Pane eventKey="reservations">
+                        <Reservations />
+                      </Tab.Pane>
+                    </Tab.Content>
+                  </Card.Body>
+                </Card>
+              </Tab.Container>
             </>
           ) : (
             <>
@@ -206,112 +328,115 @@ const Profile = () => {
                         active={activeTab === 'register'}
                         onClick={() => switchTab('register')}
                       >
-                        Registrazione
+                        Registrati
                       </Nav.Link>
                     </Nav.Item>
                   </Nav>
                 </Card.Header>
 
                 <Card.Body>
-                  {isLoading && <Loading />}
-                  {errorMessage && <Error message={errorMessage} />}
+                  {errorMessage && (
+                    <Alert variant="danger" className="mb-3">
+                      {errorMessage}
+                    </Alert>
+                  )}
 
                   {activeTab === 'login' ? (
                     <Form onSubmit={handleLogin}>
-                      <Form.Group controlId="loginUsername" className="mb-3">
+                      <Form.Group className="mb-3">
                         <Form.Label>Username</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="Inserisci il tuo username"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           required
                         />
                       </Form.Group>
 
-                      <Form.Group controlId="loginPassword" className="mb-3">
+                      <Form.Group className="mb-3">
                         <Form.Label>Password</Form.Label>
                         <Form.Control
                           type="password"
-                          placeholder="Inserisci la tua password"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
                         />
                       </Form.Group>
 
-                      <Button
-                        variant="warning"
-                        type="submit"
-                        className="w-100"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? 'Accesso in corso...' : 'Accedi'}
-                      </Button>
+                      <div className="d-grid">
+                        <Button
+                          variant="primary"
+                          type="submit"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? <Loading /> : 'Accedi'}
+                        </Button>
+                      </div>
                     </Form>
                   ) : (
                     <Form onSubmit={handleRegister}>
-                      <Form.Group controlId="registerUsername" className="mb-3">
+                      <Form.Group className="mb-3">
                         <Form.Label>Username</Form.Label>
                         <Form.Control
                           type="text"
-                          placeholder="Scegli un username"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
                           required
                         />
                       </Form.Group>
 
-                      <Form.Group controlId="registerPassword" className="mb-3">
+                      <Form.Group className="mb-3">
                         <Form.Label>Password</Form.Label>
                         <Form.Control
                           type="password"
-                          placeholder="Scegli una password (min 6 caratteri)"
                           value={password}
                           onChange={(e) => setPassword(e.target.value)}
                           required
-                          minLength={6}
                         />
                       </Form.Group>
 
-                      <Form.Group controlId="confirmPassword" className="mb-3">
+                      <Form.Group className="mb-3">
                         <Form.Label>Conferma Password</Form.Label>
                         <Form.Control
                           type="password"
-                          placeholder="Conferma la tua password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           required
                         />
                       </Form.Group>
 
-                      <Button
-                        variant="success"
-                        type="submit"
-                        className="w-100"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? 'Registrazione in corso...' : 'Registrati'}
-                      </Button>
+                      <div className="d-grid">
+                        <Button
+                          variant="success"
+                          type="submit"
+                          disabled={isLoading}
+                        >
+                          {isLoading ? <Loading /> : 'Registrati'}
+                        </Button>
+                      </div>
                     </Form>
                   )}
                 </Card.Body>
               </Card>
             </>
           )}
-
-          <ToastContainer position="top-end" className="p-3">
-            <Toast
-              show={showToast}
-              onClose={() => setShowToast(false)}
-              delay={3000}
-              autohide
-            >
-              <Toast.Body>{toastMessage}</Toast.Body>
-            </Toast>
-          </ToastContainer>
         </Col>
       </Row>
+
+      {/* Toast per i messaggi */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast
+          show={showToast}
+          onClose={() => setShowToast(false)}
+          delay={3000}
+          autohide
+        >
+          <Toast.Header>
+            <strong className="me-auto">Notifica</strong>
+          </Toast.Header>
+          <Toast.Body>{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   )
 }

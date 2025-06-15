@@ -21,6 +21,11 @@ public class ReservationService {
     private final VehicleRepository vehicleRepository;
 
     public ReservationResponse createReservation(ReservationRequest request) {
+        // Validazione delle date
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
+
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
 
@@ -75,7 +80,8 @@ public class ReservationService {
         String sellerEmail = getLoggedUserEmail();
 
         return reservationRepository.findAll().stream()
-                .filter(r -> r.getVehicle().getCreatedBy().equalsIgnoreCase(sellerEmail))
+                .filter(r -> r.getVehicle().getCreatedBy() != null &&
+                        r.getVehicle().getCreatedBy().equalsIgnoreCase(sellerEmail))
                 .map(this::mapToResponse)
                 .toList();
     }
@@ -88,6 +94,9 @@ public class ReservationService {
 
     private String getLoggedUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("User not authenticated");
+        }
         return authentication.getName();
     }
 
@@ -102,16 +111,23 @@ public class ReservationService {
                 reservation.getTotalPrice()
         );
     }
+
     public ReservationResponse updateReservation(Long id, ReservationRequest request) {
+        // Validazione delle date
+        if (request.getEndDate().isBefore(request.getStartDate())) {
+            throw new IllegalArgumentException("End date cannot be before start date");
+        }
+
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Reservation not found"));
 
-        if (!isVehicleAvailable(request.getVehicleId(), request.getStartDate(), request.getEndDate())) {
-            throw new IllegalArgumentException("Vehicle not available in selected period");
-        }
-
         Vehicle vehicle = vehicleRepository.findById(request.getVehicleId())
                 .orElseThrow(() -> new EntityNotFoundException("Vehicle not found"));
+
+        // Controlla disponibilità escludendo la prenotazione corrente
+        if (!isVehicleAvailableForUpdate(id, request.getVehicleId(), request.getStartDate(), request.getEndDate())) {
+            throw new IllegalArgumentException("Vehicle not available in selected period");
+        }
 
         reservation.setStartDate(request.getStartDate());
         reservation.setEndDate(request.getEndDate());
@@ -127,4 +143,9 @@ public class ReservationService {
         return mapToResponse(reservation);
     }
 
+    private boolean isVehicleAvailableForUpdate(Long reservationId, Long vehicleId, LocalDate startDate, LocalDate endDate) {
+        List<Reservation> overlapping = reservationRepository.findOverlappingReservations(vehicleId, startDate, endDate);
+        // Esclude la prenotazione corrente dalla verifica
+        return overlapping.stream().noneMatch(r -> !r.getId().equals(reservationId));
+    }
 }

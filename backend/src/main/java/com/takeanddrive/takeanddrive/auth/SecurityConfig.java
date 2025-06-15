@@ -50,7 +50,11 @@ public class SecurityConfig {
                                     "/api/companies/**",
                                     "/api/companies",
                                     "/api/companies/by-city",
-                                    "/api/vehicles/by-city"
+                                    "/api/vehicles/by-city",
+                                    "/api/payments/**",
+                                    "/api/users/**",
+                                    "/api/reservations",
+                                    "/api/reservations/**"
 //
                             ).permitAll()
                             .requestMatchers(
