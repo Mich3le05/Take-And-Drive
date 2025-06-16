@@ -111,20 +111,42 @@ const VehicleDetail = () => {
 
     try {
       const token = localStorage.getItem('token')
+      console.log('Token:', token ? 'Present' : 'Missing')
+      console.log('Token length:', token?.length)
 
-      // Salva la prenotazione tramite API
+      if (!token) {
+        toast.error('Token di autenticazione mancante')
+        navigate('/profile')
+        return
+      }
+
+      // Debug del token JWT
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        console.log('Token payload:', payload)
+        console.log(
+          'User roles:',
+          payload.authorities || payload.roles || payload.scope
+        )
+        console.log('Token expires:', new Date(payload.exp * 1000))
+      } catch (error) {
+        console.error('Invalid token format:', error)
+        toast.error('Token non valido, effettua nuovamente il login')
+        localStorage.removeItem('token')
+        navigate('/profile')
+        return
+      }
+
+      // Salva la prenotazione tramite API - SOLO i campi previsti dall'API
       const reservation = {
         vehicleId: reservationData.vehicleId,
-        model: reservationData.model,
         startDate: reservationData.startDate,
         endDate: reservationData.endDate,
-        city: reservationData.city,
-        pricePerDay: reservationData.pricePerDay,
-        paymentId: paymentInfo.paymentId,
-        paymentAmount: paymentInfo.amount,
-        paymentEmail: paymentInfo.email,
-        status: 'paid',
+        customerName: paymentInfo.name || 'Nome Cliente', // Prendi dal form di pagamento
+        customerEmail: paymentInfo.email,
       }
+
+      console.log('Sending reservation data:', reservation) // Debug
 
       const response = await fetch('/api/reservations', {
         method: 'POST',
@@ -136,10 +158,13 @@ const VehicleDetail = () => {
       })
 
       if (!response.ok) {
-        throw new Error('Errore nel salvare la prenotazione')
+        const errorText = await response.text()
+        console.error('Response error:', errorText)
+        throw new Error(`Errore ${response.status}: ${errorText}`)
       }
 
       const savedReservation = await response.json()
+      console.log('Saved reservation:', savedReservation)
 
       setShowPaymentModal(false)
       toast.success('Prenotazione confermata e pagamento completato!')
@@ -155,7 +180,7 @@ const VehicleDetail = () => {
       }, 2000)
     } catch (error) {
       console.error('Errore nel salvare la prenotazione:', error)
-      toast.error('Errore nel salvare la prenotazione. Riprova.')
+      toast.error(`Errore nel salvare la prenotazione: ${error.message}`)
     } finally {
       setIsBooking(false)
     }

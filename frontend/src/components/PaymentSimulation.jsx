@@ -290,9 +290,6 @@ const PaymentSimulation = ({ reservation, onPaymentComplete, onCancel }) => {
               maxLength="19"
               required
             />
-            <Form.Text className="text-muted">
-              💡 Simulazione: usa qualsiasi numero per testare
-            </Form.Text>
           </Form.Group>
 
           <Row>
@@ -325,13 +322,6 @@ const PaymentSimulation = ({ reservation, onPaymentComplete, onCancel }) => {
               </Form.Group>
             </Col>
           </Row>
-
-          <Alert variant="info" className="mb-3">
-            <small>
-              🔒 <strong>Modalità simulazione:</strong> Questo è un pagamento di
-              test. Nessuna carta verrà effettivamente addebitata.
-            </small>
-          </Alert>
 
           <div className="d-flex gap-2">
             <Button
